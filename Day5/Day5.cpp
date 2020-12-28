@@ -15,7 +15,7 @@ int main()
     uint8_t column;
 
     std::ifstream input;
-    input.open("C:\\Users\\Daniel\\Desktop\\InputsCalendar\\Day5_1.txt");
+    input.open("Day5_1.txt");
     std::string line;
     uint32_t solution = 0;
     std::vector<std::pair<int, int>> seats;
