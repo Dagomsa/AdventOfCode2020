@@ -37,9 +37,10 @@ void Part1(const std::vector<Bag>& bags, const std::string& bagtofind, std::unor
 {
     for (int i = 0; i < bags.size(); ++i)
     {
-        for (int j = 0; j < bags[i].getChildren().size(); ++j)
+        std::vector<std::pair<int, std::string>> children = bags[i].getChildren();
+        for (int j = 0; j < children.size(); ++j)
         {
-            if ((bags[i].getChildren())[j].second.compare(bagtofind) == 0)
+            if (children[j].second.compare(bagtofind) == 0)
             {
                 auto success = container.insert(bags[i].getName());
                 if (success.second == true)
