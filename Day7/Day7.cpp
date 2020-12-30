@@ -36,8 +36,9 @@ void Part1(const std::vector<Bag>& bags, const std::string& bagtofind, std::unor
         {
             if ((bags[i].getChildren())[j].compare(bagtofind) == 0)
             {
-                container.insert(bags[i].getName());
-                Part1(bags, bags[i].getName(), container);
+                auto success = container.insert(bags[i].getName());
+                if (success.second == true)
+                    Part1(bags, bags[i].getName(), container);
             }
         }
     }
