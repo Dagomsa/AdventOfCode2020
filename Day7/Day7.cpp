@@ -59,8 +59,8 @@ void Part2(const std::vector<Bag>& bags, const std::string& bagtofind, uint32_t&
             std::vector<std::pair<int, std::string>> children = bags[i].getChildren();
             for (int j = 0; j < children.size(); ++j)
             {
-                sum += children[j].first * mult;
                 uint32_t mult2 = children[j].first * mult;
+                sum += mult2;
                 Part2(bags, children[j].second, sum, mult2);
             }
             return;
