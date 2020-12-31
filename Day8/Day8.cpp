@@ -8,14 +8,26 @@
 #include <unordered_set>
 #include <map>
 
+void ParseInstructions(std::map<uint16_t, std::pair<uint8_t, int>>& instructions);
+int Part1(std::map<uint16_t, std::pair<uint8_t, int>>& instructions);
+int Part2(std::map<uint16_t, std::pair<uint8_t, int>>& instructions);
+
 int main()
 {
+    std::map<uint16_t, std::pair<uint8_t, int>> instructions;
+    ParseInstructions(instructions);
+    
+    std::cout << "Part1 solution: " << Part1(instructions) << std::endl;
+    std::cout << "Part2 solution: " << Part2(instructions) << std::endl;
+}
+
+void ParseInstructions(std::map<uint16_t, std::pair<uint8_t, int>>& instructions)
+{
+    uint16_t pos = 0;
     std::ifstream input;
     std::string line;
     input.open("input.txt");
-    std::map<uint16_t, std::pair<uint8_t, int>> instructions;
 
-    uint16_t pos = 0;
     while (getline(input, line))
     {
         uint8_t i = 0; //instruction type
@@ -31,9 +43,12 @@ int main()
         instructions.insert({ pos, p });
         pos++;
     }
-    
+}
+
+int Part1(std::map<uint16_t, std::pair<uint8_t, int>>& instructions)
+{
     int acc = 0;
-    pos = 0;
+    uint16_t pos = 0;
     std::unordered_set<int> used;
 
     while (true)
@@ -44,18 +59,91 @@ int main()
 
         switch (instructions[pos].first)
         {
-        case 1:
+        case 1: //acc
             acc += instructions[pos].second;
             pos++;
             break;
-        case 2:
+        case 2: //jmp
             pos += instructions[pos].second;
             break;
-        case 3:
+        case 3: //nop
             pos++;
             break;
         }
     }
-
-    std::cout << acc << std::endl;
+    return acc;
 }
+
+int Part2(std::map<uint16_t, std::pair<uint8_t, int>>& instructions)
+{
+    int acc = 0;
+    uint16_t pos = 0;
+    std::unordered_set<int> used;
+    std::unordered_set<int> used_modpos;
+    uint16_t endpos = instructions.size();
+    bool testingpos = false;
+    while (true)
+    {
+        auto p1 = used.insert(pos);
+        if (!p1.second)
+        {
+            //Restart loop
+            pos = 0;
+            acc = 0;
+            testingpos = false;
+            used.clear();
+            continue;
+        }
+
+        if (pos >= endpos) //check if 
+            break;
+
+
+        switch (instructions[pos].first)
+        {
+        case 1: //acc
+        {
+            acc += instructions[pos].second;
+            pos++;
+            break;
+        }
+        case 2: //jmp
+        {
+            if (!testingpos)
+            {
+                auto p2 = used_modpos.insert(pos);
+                if (p2.second)
+                {
+                    pos++;
+                    testingpos = true;
+                }
+                else
+                    pos += instructions[pos].second;
+            }
+            else
+                pos += instructions[pos].second;
+            break;
+        }
+        case 3: //nop
+        {
+            if (!testingpos)
+            {
+                auto p2 = used_modpos.insert(pos);
+                if (p2.second)
+                {
+                    pos += instructions[pos].second;
+                    testingpos = true;
+                }
+                else
+                    pos++;
+            }
+            else
+                pos++;
+
+            break;
+        }
+        }
+    }
+    return acc;
+}
+
