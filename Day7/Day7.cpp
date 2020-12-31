@@ -35,16 +35,17 @@ int main()
 
 void Part1(const std::vector<Bag>& bags, const std::string& bagtofind, std::unordered_set < std::string > & container)
 {
-    for (int i = 0; i < bags.size(); ++i)
+    for (auto &b : bags)
     {
-        std::vector<std::pair<int, std::string>> children = bags[i].getChildren();
-        for (int j = 0; j < children.size(); ++j)
+        std::vector<std::pair<int, std::string>> children = b.getChildren();
+        for (auto &c : children)
         {
-            if (children[j].second.compare(bagtofind) == 0)
+            if (c.second.compare(bagtofind) == 0)
             {
-                auto success = container.insert(bags[i].getName());
-                if (success.second == true)
-                    Part1(bags, bags[i].getName(), container);
+                std::string bname = b.getName();
+                auto success = container.insert(bname);
+                if (success.second)
+                    Part1(bags, bname, container);
             }
         }
     }
@@ -52,16 +53,16 @@ void Part1(const std::vector<Bag>& bags, const std::string& bagtofind, std::unor
 
 void Part2(const std::vector<Bag>& bags, const std::string& bagtofind, uint32_t& sum, uint32_t mult)
 {
-    for (int i = 0; i < bags.size(); ++i)
+    for (auto &b : bags)
     {
-        if (bags[i].getName().compare(bagtofind) == 0)
+        if (b.getName().compare(bagtofind) == 0)
         {
-            std::vector<std::pair<int, std::string>> children = bags[i].getChildren();
-            for (int j = 0; j < children.size(); ++j)
+            std::vector<std::pair<int, std::string>> children = b.getChildren();
+            for (auto &c : children)
             {
-                uint32_t mult2 = children[j].first * mult;
+                uint32_t mult2 = c.first * mult;
                 sum += mult2;
-                Part2(bags, children[j].second, sum, mult2);
+                Part2(bags, c.second, sum, mult2);
             }
             return;
         }
