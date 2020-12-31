@@ -7,16 +7,16 @@
 #include <deque>
 #include <vector>
 
-int Part1(std::deque<long long>& d);
+int Part1();
 
 int main()
 {
-    std::deque < long long> d;
-    std::cout << "Part1 solution: " << Part1(d) << std::endl;
+    std::cout << "Part1 solution: " << Part1() << std::endl;
 }
 
-int Part1(std::deque<long long>& d)
+int Part1()
 {
+    std::deque < long long> d;
     std::ifstream input;
     input.open("input.txt");
     std::string line;
