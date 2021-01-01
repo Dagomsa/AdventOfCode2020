@@ -27,7 +27,7 @@ int Part1()
     uint8_t pos = 0;
     while (getline(input, line))
     {
-        uint64_t newnum = stoi(line);
+        uint64_t newnum = stoll(line);
         if (pos < 25)
         {
             d.push_back(newnum);
