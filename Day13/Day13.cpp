@@ -9,6 +9,7 @@
 void LoadBusesInfo(uint32_t& starttime, std::vector<uint64_t>& buses);
 int Part1(const uint32_t& starttime, const std::vector<uint64_t>& buses);
 uint64_t Part2(const std::vector<uint64_t>& buses);
+void CalculateGroupPeriod(const std::vector<std::pair<int, int>>& buses, uint64_t& step, uint64_t& offset);
 
 int main()
 {
@@ -71,32 +72,67 @@ int Part1(const uint32_t& starttime, const std::vector<uint64_t>& buses)
 
 uint64_t Part2(const std::vector<uint64_t>& buses)
 {
-    uint64_t t = buses[0];
+    std::vector<std::pair<int, int>> busesp;
+    std::vector<std::vector<std::pair<int, int>>> vbusesp;
+    std::vector<std::pair<int, int>> allbuses;
 
-    std::vector<std::pair<int, int>> pairs;
     for (int i = 0; i < buses.size(); ++i)
     {
         if (buses[i] != 0)
-            pairs.push_back(std::make_pair(buses[i], i));
+        {
+            auto p = std::make_pair(buses[i], i);
+            busesp.push_back(p);
+            allbuses.push_back(p);
+            if (busesp.size() > 3)
+            {
+                vbusesp.push_back(busesp);
+                busesp.clear();
+            }
+        }
+    }
+    if (!busesp.empty())
+        vbusesp.push_back(busesp);
+
+    uint64_t acc = 1;
+    uint64_t step = 1;
+    uint64_t offset = 0;
+    for (auto& bp : vbusesp)
+    {
+        CalculateGroupPeriod(bp,step, offset);
     }
 
-    int multiplier = 1;
-    while (true)
+    return offset;
+
+}
+
+void CalculateGroupPeriod(const std::vector<std::pair<int, int>>& buses, uint64_t& step, uint64_t& offset)
+{
+    uint64_t t = offset;
+
+    if (step == 1)
+        step = buses[0].first;
+
+    bool found = false;
+    bool cicle = false;
+    while (!found)
     {
-        t += buses[0] * multiplier;
-        multiplier = 1;
-        bool found = true;
-        for (uint16_t i = 1; i < pairs.size(); ++i)
+        t += step;
+        found = true;
+        for (uint16_t i = 1; i < buses.size(); ++i)
         {
-            uint64_t val = pairs[i].first;
-            uint64_t pos = pairs[i].second;
-            if (val - t % val != pos)
+            uint64_t val = buses[i].first;
+            uint64_t pos = buses[i].second;
+            int delay = val - t % val;
+            if (delay != pos)
             {
                 found = false;
                 break;
             }
         }
         if (found)
-            return t;
+            offset = t;
     }
+
+    //calculate new cicle
+    
 }
