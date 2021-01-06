@@ -5,11 +5,12 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <unordered_set>
 
 void LoadBusesInfo(uint32_t& starttime, std::vector<uint64_t>& buses);
 int Part1(const uint32_t& starttime, const std::vector<uint64_t>& buses);
 uint64_t Part2(const std::vector<uint64_t>& buses);
-void CalculateGroupPeriod(const std::vector<std::pair<int, int>>& buses, uint64_t& step, uint64_t& offset);
+uint64_t CalculateTime(std::vector<std::pair<uint64_t, uint64_t>>& buses);
 
 int main()
 {
@@ -72,67 +73,44 @@ int Part1(const uint32_t& starttime, const std::vector<uint64_t>& buses)
 
 uint64_t Part2(const std::vector<uint64_t>& buses)
 {
-    std::vector<std::pair<int, int>> busesp;
-    std::vector<std::vector<std::pair<int, int>>> vbusesp;
-    std::vector<std::pair<int, int>> allbuses;
+    std::vector<std::pair<uint64_t, uint64_t>> allbuses;
 
-    for (int i = 0; i < buses.size(); ++i)
+    for (uint16_t i = 0; i < buses.size(); ++i)
     {
         if (buses[i] != 0)
         {
             auto p = std::make_pair(buses[i], i);
-            busesp.push_back(p);
             allbuses.push_back(p);
-            if (busesp.size() > 3)
-            {
-                vbusesp.push_back(busesp);
-                busesp.clear();
-            }
         }
     }
-    if (!busesp.empty())
-        vbusesp.push_back(busesp);
-
-    uint64_t acc = 1;
-    uint64_t step = 1;
-    uint64_t offset = 0;
-    for (auto& bp : vbusesp)
-    {
-        CalculateGroupPeriod(bp,step, offset);
-    }
-
-    return offset;
-
+    return CalculateTime(allbuses);
 }
 
-void CalculateGroupPeriod(const std::vector<std::pair<int, int>>& buses, uint64_t& step, uint64_t& offset)
+uint64_t CalculateTime(std::vector<std::pair<uint64_t, uint64_t>>& buses)
 {
-    uint64_t t = offset;
+    uint64_t t = 0;
+    uint64_t step = buses[0].first;
 
-    if (step == 1)
-        step = buses[0].first;
+    buses.erase(buses.begin());
 
-    bool found = false;
-    bool cicle = false;
-    while (!found)
+    int size = buses.size();
+    while (true)
     {
-        t += step;
-        found = true;
-        for (uint16_t i = 1; i < buses.size(); ++i)
+        for (uint16_t i = 0; i < size; ++i)
         {
             uint64_t val = buses[i].first;
             uint64_t pos = buses[i].second;
-            int delay = val - t % val;
-            if (delay != pos)
+            uint64_t delay = (val - t % val);
+            if ( delay == pos % val)
             {
-                found = false;
-                break;
+                step *= val;
+                size--;
+                buses.erase(buses.begin() + i);
             }
         }
-        if (found)
-            offset = t;
-    }
+        if (size==0)
+            return t;
 
-    //calculate new cicle
-    
+        t += step;
+    }
 }
