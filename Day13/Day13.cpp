@@ -5,7 +5,6 @@
 #include <vector>
 #include <string>
 #include <fstream>
-#include <unordered_set>
 
 void LoadBusesInfo(uint32_t& starttime, std::vector<uint64_t>& buses);
 int Part1(const uint32_t& starttime, const std::vector<uint64_t>& buses);
@@ -103,9 +102,10 @@ uint64_t CalculateTime(std::vector<std::pair<uint64_t, uint64_t>>& buses)
             uint64_t delay = (val - t % val);
             if ( delay == pos % val)
             {
-                step *= val;
+                step *= val; //we can do that because all val are coprime. if it weren't, we need to calculate least common multiple
                 size--;
                 buses.erase(buses.begin() + i);
+                i--;
             }
         }
         if (size==0)
