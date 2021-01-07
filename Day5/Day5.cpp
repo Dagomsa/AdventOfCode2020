@@ -1,38 +1,37 @@
-// calendar.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <sstream>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <algorithm>
 
-int calculateRow(const std::string& srow);
-int calculateColumn(const std::string& scolumn);
 int main()
 {
-    uint8_t row;
-    uint8_t column;
-
     std::ifstream input;
-    input.open("Day5_1.txt");
+    input.open("input.txt");
     std::string line;
-    uint32_t solution = 0;
+    uint32_t solution1 = 0;
+    uint32_t solution2 = 0;
     std::vector<std::pair<int, int>> seats;
     std::vector<int> ids;
 
-    seats.reserve(1024);
-    ids.reserve(1024);
     while (std::getline(input, line))
     {
-        std::string srow = line.substr(0, 7);
-        std::string scolumn = line.substr(7, 3);
+        for (auto& l : line)
+        {
+            if (l == 'B' || l == 'R')
+                l = '1';
+            else
+                l = '0';
+        }
 
-        int a = calculateRow(srow);
-        int b = calculateColumn(scolumn);
-        seats.emplace_back(a, b);
-        ids.emplace_back(a * 8 + b);
+        uint32_t a = stoi(line.substr(0, 7), 0, 2);
+        uint32_t b = stoi(line.substr(7, 3), 0, 2);
+        seats.push_back(std::make_pair(a, b));
+        ids.push_back(a * 8 + b);
     }
+
+    for (const auto& i : ids)
+        solution1 = solution1 > i ? solution1 : i;
 
     std::pair<int, int> remaining;
     for (int i = 0; i < 128; i++)
@@ -53,30 +52,7 @@ int main()
         }
     }
 
-    solution = remaining.first * 8 + remaining.second;
-    std::cout << solution << std::endl;
-}
-
-int calculateRow(const std::string& srow)
-{
-    int row = 0;
-    for (int i = 0; i < srow.length(); i++)
-    {
-        int j = srow.length() - i - 1;
-        if (srow[i] == 'B')
-            row += pow(2, j);
-    }
-    return row;
-}
-
-int calculateColumn(const std::string& scolumn)
-{
-    int column = 0;
-    for (int i = 0; i < scolumn.length(); i++)
-    {
-        int j = scolumn.length() - i - 1;
-        if (scolumn[i] == 'R')
-            column += pow(2, j);
-    }
-    return column;
+    solution2 = remaining.first * 8 + remaining.second;
+    std::cout << "Part 1 solution: " << solution1 << std::endl;
+    std::cout << "Part 2 solution: " << solution2 << std::endl;
 }
