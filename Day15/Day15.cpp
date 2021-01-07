@@ -13,8 +13,6 @@ int main()
 
 uint64_t Solve(uint64_t desiredturn)
 {
-    uint64_t solution1 = 0;
-
     std::unordered_map<int, int> historic;
 
     //Puzzle input
@@ -48,6 +46,7 @@ uint64_t Solve(uint64_t desiredturn)
             a = turn - 1 - historic[consider];
 
         existed = historic.find(a) != historic.end();
+
         if (existed)
             prevconsidervalue = historic[a];
         else
