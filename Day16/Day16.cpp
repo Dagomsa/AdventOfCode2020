@@ -12,7 +12,10 @@ using Rules = std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>>;
 
 uint32_t Part1(std::vector<int>& myticket, std::vector<std::vector<int>>& nearbytickets, Rules& rules);
 uint64_t Part2(const std::vector<int>& myticket, const std::vector<std::vector<int>>& nearbytickets, const Rules& rules);
-void CalculateStep(std::vector<std::vector<int>>& column_rules, std::vector<std::vector<int>>& rules_column, std::unordered_map<int, int>& decoded);
+void setRule(Rules& rules, std::unordered_set<uint32_t>& valid, const std::string& line);
+void setMyTicket(std::vector<int>& myticket, std::string& line);
+uint32_t setNearbyTickets(std::vector<std::vector<int>>& nearbytickets, const std::unordered_set<uint32_t>& valid, std::string& line);
+void DecodeStep(std::vector<std::vector<int>>& column_rules, std::vector<std::vector<int>>& rules_column, std::unordered_map<int, int>& decoded);
 uint64_t CalculateFinalResult(const std::unordered_map<int, int>& decoded, const std::vector<int>& myticket);
 
 int main()
@@ -42,31 +45,6 @@ uint32_t Part1(std::vector<int>& myticket , std::vector<std::vector<int>>& nearb
             continue;
         }
 
-        if (rulesset && !myticketset)
-        {
-            if (line[0] == 'y') // "your ticket: " 
-                continue;
-
-            for (auto& l : line)
-            {
-                if (l == ',')
-                    l = ' ';
-            }
-            std::stringstream ss;
-            ss << line;
-            std::string stmp;
-            uint32_t tmp;
-            while (!ss.eof())
-            {
-                /* extracting word by word from stream */
-                ss >> stmp;
-
-                /* Checking the given word is integer or not */
-                if (std::stringstream(stmp) >> tmp)
-                    myticket.push_back(tmp);
-            }
-        }
-
         if (line == "")
         {
             rulesset = true;
@@ -75,26 +53,16 @@ uint32_t Part1(std::vector<int>& myticket , std::vector<std::vector<int>>& nearb
 
         if (!rulesset)
         {
-            int pos1 = line.find(":");
-            int pos2 = line.find("-");
-            int pos3 = line.find("or", pos2);
-            int pos4 = line.find("-", pos3);
+            setRule(rules, valid, line);
+            continue;
+        }
 
-            int min = std::stoi(line.substr(pos1 + 2, pos2 - (pos1 + 2)));
-            int max = std::stoi(line.substr(pos2 + 1, pos3 - 1 - (pos2 + 1)));
-            auto p1 = std::make_pair(min, max);
+        if (rulesset && !myticketset)
+        {
+            if (line[0] == 'y') // "your ticket: " 
+                continue;
 
-            for (int i = min; i < max + 1; ++i)
-                valid.insert(i);
-
-            min = std::stoi(line.substr(pos3 + 3, pos4 - (pos3 + 3)));
-            max = std::stoi(line.substr(pos4+1));
-            auto p2 = std::make_pair(min, max);
-
-            for (int i = min; i < max + 1; ++i)
-                valid.insert(i);
-
-            rules.push_back(std::make_pair(p1, p2));
+            setMyTicket(myticket, line);
         }
 
         if (myticketset)
@@ -102,41 +70,94 @@ uint32_t Part1(std::vector<int>& myticket , std::vector<std::vector<int>>& nearb
             if (line[0] == 'n') // "nearby tickets: " 
                 continue;
 
-            std::vector<int> thisticket;
-            bool invalidticket = false;
-
-            std::stringstream ss;
-            for (auto& l : line)
-            {
-                if (l == ',')
-                    l = ' ';
-            }
-            ss << line;
-            std::string stmp;
-            uint32_t tmp;
-            while (!ss.eof())
-            {
-                /* extracting word by word from stream */
-                ss >> stmp;
-
-                /* Checking the given word is integer or not */
-                if (std::stringstream(stmp) >> tmp)
-                {
-                    thisticket.push_back(tmp);
-                    bool invalidnum = (valid.find(tmp) == valid.end());
-                    if (invalidnum)
-                    {
-                        invalidticket = true;
-                        result += tmp;
-                    }
-                }
-            }
-            if (!invalidticket)
-                nearbytickets.push_back(thisticket);
+            result += setNearbyTickets(nearbytickets, valid, line); //returns sum of invalid numbers found in this line
         }
     }
     return result;
 }
+
+void setRule(Rules& rules, std::unordered_set<uint32_t>& valid, const std::string& line)
+{
+    int pos1 = line.find(":");
+    int pos2 = line.find("-");
+    int pos3 = line.find("or", pos2);
+    int pos4 = line.find("-", pos3);
+
+    int min = std::stoi(line.substr(pos1 + 2, pos2 - (pos1 + 2)));
+    int max = std::stoi(line.substr(pos2 + 1, pos3 - 1 - (pos2 + 1)));
+    auto p1 = std::make_pair(min, max);
+
+    for (int i = min; i < max + 1; ++i)
+        valid.insert(i);
+
+    min = std::stoi(line.substr(pos3 + 3, pos4 - (pos3 + 3)));
+    max = std::stoi(line.substr(pos4 + 1));
+    auto p2 = std::make_pair(min, max);
+
+    for (int i = min; i < max + 1; ++i)
+        valid.insert(i);
+
+    rules.push_back(std::make_pair(p1, p2));
+}
+void setMyTicket(std::vector<int>& myticket, std::string& line)
+{
+    for (auto& l : line)
+    {
+        if (l == ',')
+            l = ' ';
+    }
+    std::stringstream ss;
+    ss << line;
+    std::string stmp;
+    uint32_t tmp;
+    while (!ss.eof())
+    {
+        /* extracting word by word from stream */
+        ss >> stmp;
+
+        /* Checking the given word is integer or not */
+        if (std::stringstream(stmp) >> tmp)
+            myticket.push_back(tmp);
+    }
+}
+uint32_t setNearbyTickets(std::vector<std::vector<int>>& nearbytickets, const std::unordered_set<uint32_t>& valid, std::string& line)
+{
+    std::vector<int> thisticket;
+    bool invalidticket = false;
+    uint32_t result = 0;
+    std::stringstream ss;
+    for (auto& l : line)
+    {
+        if (l == ',')
+            l = ' ';
+    }
+    ss << line;
+    std::string stmp;
+    uint32_t tmp;
+    while (!ss.eof())
+    {
+        /* extracting word by word from stream */
+        ss >> stmp;
+
+        /* Checking the given word is integer or not */
+        if (std::stringstream(stmp) >> tmp)
+        {
+            thisticket.push_back(tmp);
+            bool invalidnum = (valid.find(tmp) == valid.end());
+            if (invalidnum)
+            {
+                invalidticket = true;
+                result += tmp;
+            }
+        }
+    }
+    if (!invalidticket)
+        nearbytickets.push_back(thisticket);
+
+    return result;
+}
+
+
 uint64_t Part2(const std::vector<int>& myticket, const std::vector<std::vector<int>>& nearbytickets, const Rules& rules)
 {
     std::vector<std::vector<int>> column_rules;
@@ -144,16 +165,19 @@ uint64_t Part2(const std::vector<int>& myticket, const std::vector<std::vector<i
     std::vector<std::vector<int>> nearby_by_column;
     std::vector<int> column;
 
+    //Here I split all the ticket values by its positions (by column)
+    column.reserve(nearbytickets.size());
+    nearby_by_column.reserve(nearbytickets[0].size());
     for (int i = 0; i < nearbytickets[0].size(); ++i) //for each ticket
     {
         for (int j = 0; j < nearbytickets.size(); ++j) //for each column
-        {
-            column.push_back(nearbytickets[j][i]);
-        }
-        nearby_by_column.push_back(column);
+            column.emplace_back(nearbytickets[j][i]);
+
+        nearby_by_column.emplace_back(column);
         column.clear();
     }
 
+    //For every value position (column), I check what rules fit with their values and store them in "column_rules"
     column_rules.resize(rules.size());
     for (int r = 0; r < rules.size(); ++r)
     {
@@ -171,29 +195,30 @@ uint64_t Part2(const std::vector<int>& myticket, const std::vector<std::vector<i
                 }
             }
             if (fitsrule)
-                column_rules[i].push_back(r);
+                column_rules[i].emplace_back(r);
         }
     }
 
-
+    //Here, for every rule, I store what columns are their possible candidates.
     for (int r = 0; r < rules.size(); ++r)
     {
         rules_column.push_back(std::vector<int>());
         for (int i = 0; i < column_rules.size(); ++i)
         {
-            if (std::find(column_rules[i].begin(), column_rules[i].end(), r) != column_rules[i].end()) //if the rule applies to he column
+            if (std::find(column_rules[i].begin(), column_rules[i].end(), r) != column_rules[i].end()) //if the rule applies to the column
                 rules_column[r].push_back(i);
         }
     }
 
+    //Solving the rules-column relationship
     std::unordered_map<int, int> decoded;
     while (decoded.size() < rules.size())
-        CalculateStep(column_rules, rules_column, decoded);
+        DecodeStep(column_rules, rules_column, decoded);
 
     return CalculateFinalResult(decoded, myticket);
 }
 
-void CalculateStep(std::vector<std::vector<int>>& column_rules, std::vector<std::vector<int>>& rules_column, std::unordered_map<int,int>& decoded) 
+void DecodeStep(std::vector<std::vector<int>>& column_rules, std::vector<std::vector<int>>& rules_column, std::unordered_map<int,int>& decoded) 
 {
     //decoded: key:rule , value:column
     for (int i = 0; i < column_rules.size(); ++i)
