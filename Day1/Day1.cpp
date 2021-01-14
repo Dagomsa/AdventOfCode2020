@@ -37,7 +37,7 @@ uint32_t Part2(const std::vector<uint16_t>& list)
 {
     for (int i = 0; i < list.size(); ++i)
     {
-        for (int j = 0; j < list.size(); ++j)
+        for (int j = i; j < list.size(); ++j)
         {
             if (list[i] + list[j] > 2020)
                 continue;
